@@ -1,5 +1,5 @@
-FROM alpine:3.4
-MAINTAINER Ilya Stepanov <dev@ilyastepanov.com>
+FROM alpine:3.5
+MAINTAINER Clay Dowling <clay@lazarusid.com>
 
 ENV DOKUWIKI_VERSION 2016-06-26a
 ENV MD5_CHECKSUM 9b9ad79421a1bdad9c133e859140f3f2
@@ -41,6 +41,6 @@ RUN echo "cgi.fix_pathinfo = 0;" >> /etc/php7/php-fpm.ini && \
     chmod +x /start.sh
 
 EXPOSE 80
-VOLUME ["/var/dokuwiki-storage"]
+VOLUME ["/var/dokuwiki-storage", "/var/dokuwiki-farm"]
 
 CMD /start.sh
