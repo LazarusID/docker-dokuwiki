@@ -4,8 +4,10 @@ MAINTAINER Clay Dowling <clay@lazarusid.com>
 ENV DOKUWIKI_VERSION 2016-06-26a
 ENV MD5_CHECKSUM 9b9ad79421a1bdad9c133e859140f3f2
 
+ENV PLUGINS blog filelist gallery google_cal include nspages pagelist socialcards tag
+
 RUN apk --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/community/ add \
-    php7 php7-fpm php7-gd php7-session php7-xml nginx supervisor curl tar
+    php7 php7-fpm php7-gd php7-session php7-xml nginx supervisor curl tar git
 
 RUN mkdir -p /run/nginx && \
     mkdir -p /var/www /var/dokuwiki-storage/data && \
@@ -27,6 +29,11 @@ RUN mkdir -p /run/nginx && \
     ln -s /var/dokuwiki-storage/data/attic /var/www/data/attic && \
     mv /var/www/conf /var/dokuwiki-storage/conf && \
     ln -s /var/dokuwiki-storage/conf /var/www/conf
+
+# Plugins
+RUN export GITTOOL=`find /var/www -name "gittool.php"` && \
+  chmod 755 $GITTOOL && \
+  php7 $GITTOOL install $PLUGINS
 
 ADD nginx.conf /etc/nginx/nginx.conf
 ADD supervisord.conf /etc/supervisord.conf
