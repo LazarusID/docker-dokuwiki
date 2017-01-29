@@ -4,13 +4,16 @@ MAINTAINER Clay Dowling <clay@lazarusid.com>
 ENV DOKUWIKI_VERSION 2016-06-26a
 ENV MD5_CHECKSUM 9b9ad79421a1bdad9c133e859140f3f2
 
-ENV PLUGINS blog filelist gallery google_cal include nspages pagelist socialcards tag
+ENV PLUGINS blog filelist farmer gallery include nspages pagelist \
+  socialcards tag template:bootstrap3
+
+ENV CONF /var/www/conf
 
 RUN apk --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/community/ add \
     php7 php7-fpm php7-gd php7-session php7-xml nginx supervisor curl tar git
 
 RUN mkdir -p /run/nginx && \
-    mkdir -p /var/www /var/dokuwiki-storage/data && \
+    mkdir -p /var/www /var/dokuwiki-storage/data /var/dokuwiki-farm && \
     cd /var/www && \
     curl -O -L "https://download.dokuwiki.org/src/dokuwiki/dokuwiki-$DOKUWIKI_VERSION.tgz" && \
     tar -xzf "dokuwiki-$DOKUWIKI_VERSION.tgz" --strip 1 && \
@@ -28,8 +31,8 @@ RUN mkdir -p /run/nginx && \
     mv /var/www/data/attic /var/dokuwiki-storage/data/attic && \
     ln -s /var/dokuwiki-storage/data/attic /var/www/data/attic && \
     mv /var/www/conf /var/dokuwiki-storage/conf && \
-    ln -s /var/dokuwiki-storage/conf /var/www/conf
-
+    ln -s /var/dokuwiki-storage/conf /var/www/conf && \
+    chown -R nobody:nogroup /var/dokuwiki-farm
 # Plugins
 RUN export GITTOOL=`find /var/www -name "gittool.php"` && \
   chmod 755 $GITTOOL && \
@@ -38,6 +41,9 @@ RUN export GITTOOL=`find /var/www -name "gittool.php"` && \
 ADD nginx.conf /etc/nginx/nginx.conf
 ADD supervisord.conf /etc/supervisord.conf
 ADD start.sh /start.sh
+# COPY local.protected.php $CONF
+# COPY local.php $CONF
+# COPY acl.auth.php $CONF
 
 RUN echo "cgi.fix_pathinfo = 0;" >> /etc/php7/php-fpm.ini && \
     sed -i -e "s|;daemonize\s*=\s*yes|daemonize = no|g" /etc/php7/php-fpm.conf && \
